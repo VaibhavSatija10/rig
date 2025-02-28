@@ -128,11 +128,22 @@ impl Client {
             HeaderValue::from_str(&format!("Bearer {}", api_key))
                 .map_err(|_| MiraError::InvalidApiKey)?,
         );
+        headers.insert(
+            reqwest::header::ACCEPT,
+            HeaderValue::from_static("application/json"),
+        );
+        headers.insert(
+            reqwest::header::USER_AGENT,
+            HeaderValue::from_static("rig-client/1.0"),
+        );
         println!("Headers: {:?}", headers);
 
         Ok(Self {
             base_url: "https://api.mira.network".to_string(),
-            client: reqwest::Client::new(),
+            client: reqwest::Client::builder()
+                .timeout(std::time::Duration::from_secs(30))
+                .build()
+                .expect("Failed to build HTTP client"),
             headers,
         })
     }
